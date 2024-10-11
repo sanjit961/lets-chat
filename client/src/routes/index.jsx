@@ -5,15 +5,37 @@ import CheckPasswordPage from "../pages/CheckPasswordPage";
 import CheckEmailPage from "../pages/CheckEmailPage";
 import Home from "../pages/Home";
 import MessagePage from "../components/MessagePage";
+import AuthLayouts from "../layout/index";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      { path: "register", element: <RegisterPage /> },
-      { path: "password", element: <CheckPasswordPage /> },
-      { path: "email", element: <CheckEmailPage /> },
+      {
+        path: "register",
+        element: (
+          <AuthLayouts>
+            <RegisterPage />
+          </AuthLayouts>
+        ),
+      },
+      {
+        path: "password",
+        element: (
+          <AuthLayouts>
+            <CheckPasswordPage />
+          </AuthLayouts>
+        ),
+      },
+      {
+        path: "email",
+        element: (
+          <AuthLayouts>
+            <CheckEmailPage />
+          </AuthLayouts>
+        ),
+      },
       {
         path: "",
         element: <Home />,
