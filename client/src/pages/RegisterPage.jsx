@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { IoClose } from "react-icons/io5";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { uploadFile } from "../helpers/uploadFile.jsx";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 function RegisterPage() {
   const [data, setData] = useState({
@@ -11,6 +14,7 @@ function RegisterPage() {
   });
 
   const [uploadPhoto, setUploadPhoto] = useState("");
+  const navigate = useNavigate();
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -22,9 +26,19 @@ function RegisterPage() {
     });
   };
 
-  const handleUploadPhoto = (e) => {
+  const handleUploadPhoto = async (e) => {
     const file = e.target.files[0];
+
+    const uploadMyFile = await uploadFile(file);
+
     setUploadPhoto(file);
+
+    setData((prev) => {
+      return {
+        ...prev,
+        profile_pic: uploadMyFile?.url,
+      };
+    });
   };
 
   const handleClearUploadPhoto = (e) => {
@@ -33,10 +47,32 @@ function RegisterPage() {
     setUploadPhoto(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log(data)
+
+    const URL = `http://localhost:8000/api/register`;
+
+    try {
+      const response = await axios.post(URL, data);
+
+      toast.success(response?.data?.message);
+
+      if (response.data.success) {
+        setData({
+          name: "",
+          email: "",
+          password: "",
+          profile_pic: "",
+        });
+      }
+      navigate("/email");
+    } catch (error) {
+      console.log("error", error);
+
+      toast.error(error?.response?.data?.message);
+    }
+    // console.log(data);
   };
   return (
     <div className="mt-5">
@@ -73,7 +109,7 @@ function RegisterPage() {
             <label htmlFor="password">password: </label>
             <input
               className="bg-slate-100 px-2 py-1 focus:outline-primary"
-              type="text"
+              type="password"
               value={data.password}
               onChange={handleOnChange}
               required
@@ -116,7 +152,12 @@ function RegisterPage() {
             Register
           </button>
         </form>
-        <p className="my-3 text-center">Already have an account? <Link to={"/email"} className="hover:text-primary font-semibold">Login</Link></p>
+        <p className="my-3 text-center">
+          Already have an account?{" "}
+          <Link to={"/email"} className="hover:text-primary font-semibold">
+            Login
+          </Link>
+        </p>
       </div>
     </div>
   );

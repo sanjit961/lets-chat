@@ -8,13 +8,14 @@ const router = require("./routes/index");
 const app = express();
 app.use(cookieParser());
 
+app.use(cors());
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: process.env.FRONTEND_URL,
+//     credentials: true,
+//   })
+// );
 
 app.use(express.json());
 
