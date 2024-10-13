@@ -54,7 +54,7 @@ function CheckEmailPage() {
         <div className="w-fit mx-auto mb-2">
           <PiUserCircle size={80} />
         </div>
-        <h3>Welcome to Chat App!</h3>
+
         <form className="grid gap-4 mt-3" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-1">
             <label htmlFor="email">Email: </label>

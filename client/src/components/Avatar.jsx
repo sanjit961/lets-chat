@@ -25,14 +25,14 @@ function Avatar({ userId, name, imageUrl, width, height }) {
 
   return (
     <div
-      className={`text-slate-800 overflow-hidden rounded-full shadow border text-xl font-bold ${bgColor[randomNumber]}`}
+      className={`text-slate-800 overflow-hidden rounded-full font-bold}`}
     >
       {imageUrl ? (
         <img src={imageUrl} width={width} height={height} alt={name} />
       ) : name ? (
         <div
           style={{ width: width + "px", height: height + "px" }}
-          className="overflow-hidden rounded-full flex justify-center items-center"
+          className={`overflow-hidden rounded-full flex justify-center text-lg items-center ${bgColor[randomNumber]}`}
         >
           {avatarName.toUpperCase()}
         </div>
