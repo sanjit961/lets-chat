@@ -1,15 +1,16 @@
 import axios from "axios";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { logout, setUser } from "../redux/userSlice";
 import Sidebar from "../components/Sidebar";
+import logo from "../assets/logo.png";
 
 function Home() {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  console.log("reux use", user);
+  const location = useLocation();
 
   const fetchUserDetails = async () => {
     const URL = `http://localhost:8000/api/user-details`;
@@ -35,16 +36,24 @@ function Home() {
     fetchUserDetails();
   }, []);
 
+  const basePath = location.pathname === "/";
+
   return (
     <div className="grid lg:grid-cols-[300px,1fr] h-screen max-h-screen">
-      <section className="bg-white">
+      <section className={`bg-white ${!basePath && "hidden"} lg:block`}>
         <Sidebar />
       </section>
 
       {/* Message component*/}
-      <section>
+      <section className={`${basePath && "hidden"}`}>
         <Outlet />
       </section>
+      <div className="lg:flex justify-center items-center flex-col gap-2 hidden">
+        <div>
+          <img src={logo} alt="logo" width={200} />
+        </div>
+        <p className="text-lg mt-2 text-slate-500">Select user to send message</p>
+      </div>
     </div>
   );
 }

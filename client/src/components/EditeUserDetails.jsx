@@ -1,6 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Avatar from "./Avatar";
 import { uploadFile } from "../helpers/uploadFile";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { setUser } from "../redux/userSlice";
 
 function EditeUserDetails({ onClose, user }) {
   const [data, setData] = useState({
@@ -8,42 +12,51 @@ function EditeUserDetails({ onClose, user }) {
     profile_pic: user?.profile_pic,
   });
 
+  const uploadPhotoRef = useRef();
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    setData((prev) => {
-      return {
-        ...prev,
-        ...user,
-      };
-    });
+    setData((prev) => ({
+      ...prev,
+      ...user,
+    }));
   }, [user]);
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
-
-    setData((prev) => {
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
+    setData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleUploadPhoto = async (e) => {
     const file = e.target.files[0];
-
     const uploadMyFile = await uploadFile(file);
 
-    setData((prev) => {
-      return {
-        ...prev,
-        profile_pic: uploadMyFile?.url,
-      };
-    });
+    setData((prev) => ({
+      ...prev,
+      profile_pic: uploadMyFile?.url,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+    const URL = `http://localhost:8000/api/update-user`;
+    try {
+      const response = await axios.put(URL, data);
+      toast.success(response?.data?.message);
+      if (response?.data?.success) {
+        dispatch(setUser(response.data.data));
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message);
+    }
+  };
+
+  const handleOpenUploadPhoto = () => {
+    uploadPhotoRef.current.click();
   };
 
   return (
@@ -65,7 +78,7 @@ function EditeUserDetails({ onClose, user }) {
           </div>
 
           <div>
-            <label htmlFor="profile_pic">Photo</label>
+            <div>Photo:</div>
             <div className="my-1 flex items-center gap-4">
               <Avatar
                 width={40}
@@ -73,19 +86,36 @@ function EditeUserDetails({ onClose, user }) {
                 imageUrl={data?.profile_pic}
                 name={data?.name}
               />
-              <button className="font-semibold">change Photo</button>
-              <input
-                type="file"
-                className="hidden"
-                onChange={handleUploadPhoto}
-              />
+              <label htmlFor="profile_pic">
+                <button
+                  className="font-semibold"
+                  type="button"
+                  onClick={handleOpenUploadPhoto}
+                >
+                  Change Photo
+                </button>
+                <input
+                  type="file"
+                  id="profile_pic"
+                  className="hidden"
+                  ref={uploadPhotoRef}
+                  onChange={handleUploadPhoto}
+                />
+              </label>
             </div>
           </div>
           <div className="flex gap-2 w-fit ml-auto mt-3">
-            <button className="border-primary border px-4 text-primary py-1 rounded">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border-primary border px-4 text-primary py-1 rounded hover:bg-primary hover:text-white"
+            >
               Cancel
             </button>
-            <button className="border-primary bg-primary border px-4 py-1 text-white rounded">
+            <button
+              type="submit"
+              className="border-primary bg-primary border px-4 py-1 text-white rounded hover:bg-secondary"
+            >
               Save
             </button>
           </div>
