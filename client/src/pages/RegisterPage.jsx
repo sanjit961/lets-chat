@@ -72,7 +72,7 @@ function RegisterPage() {
 
       toast.error(error?.response?.data?.message);
     }
-    // console.log(data);
+
   };
   return (
     <div className="mt-5">

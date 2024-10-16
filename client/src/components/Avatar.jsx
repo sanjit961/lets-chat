@@ -1,7 +1,10 @@
 import React from "react";
 import { PiUserCircle } from "react-icons/pi";
+import { useSelector } from "react-redux";
 
 function Avatar({ userId, name, imageUrl, width, height }) {
+  const onlineUser = useSelector((state) => state?.user?.onlineUser);
+
   let avatarName = "";
   if (name) {
     const splitName = name?.split("");
@@ -23,12 +26,14 @@ function Avatar({ userId, name, imageUrl, width, height }) {
 
   const randomNumber = Math.floor(Math.random() * 5);
 
+  const isOnline = onlineUser.includes(userId);
+  
+  const dotColor = isOnline ? "bg-green-500" : "bg-gray-500"; // green for online, gray for offline
+
   return (
-    <div
-      className={`text-slate-800 overflow-hidden rounded-full font-bold}`}
-    >
+    <div className="text-slate-800 rounded-full font-bold relative">
       {imageUrl ? (
-        <img src={imageUrl} width={width} height={height} alt={name} />
+        <img src={imageUrl} width={width} height={height} alt={name} className="rounded-full" />
       ) : name ? (
         <div
           style={{ width: width + "px", height: height + "px" }}
@@ -39,6 +44,10 @@ function Avatar({ userId, name, imageUrl, width, height }) {
       ) : (
         <PiUserCircle size={width} />
       )}
+      <div
+        className={`${dotColor} p-1 absolute bottom-2 right-2 z-10 rounded-full border-2 border-white`}
+        style={{ width: "10px", height: "10px" }}
+      ></div>
     </div>
   );
 }

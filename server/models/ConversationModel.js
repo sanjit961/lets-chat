@@ -14,6 +14,11 @@ const messageSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    msgByUserId: {
+      type: mongoose.Schema.ObjectId,
+      require: true,
+      ref: "User",
+    },
     seen: {
       type: Boolean,
       default: false,
@@ -50,4 +55,3 @@ module.exports = {
   MessageModel,
   ConversationModel,
 };
-

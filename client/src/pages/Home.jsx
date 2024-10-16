@@ -2,9 +2,17 @@ import axios from "axios";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { logout, setUser } from "../redux/userSlice";
+import {
+  logout,
+  setOnlineUser,
+  setSocketConnection,
+  setUser,
+} from "../redux/userSlice";
 import Sidebar from "../components/Sidebar";
 import logo from "../assets/logo.png";
+import io from "socket.io-client";
+
+const BACKEND_URL = "http://localhost:8000";
 
 function Home() {
   const user = useSelector((state) => state.user);
@@ -22,7 +30,6 @@ function Home() {
 
       dispatch(setUser(response.data.data));
 
-      console.log(response);
       if (response.data.logout) {
         dispatch(logout());
         navigate("/email");
@@ -34,6 +41,24 @@ function Home() {
 
   useEffect(() => {
     fetchUserDetails();
+  }, []);
+
+  useEffect(() => {
+    const socketConnection = io(BACKEND_URL, {
+      auth: {
+        token: localStorage.getItem("token"),
+      },
+    });
+
+    socketConnection.on("onlineUser", (data) => {
+      dispatch(setOnlineUser(data));
+    });
+
+    dispatch(setSocketConnection(socketConnection));
+    
+    return () => {
+      socketConnection.disconnect();
+    };
   }, []);
 
   const basePath = location.pathname === "/";
@@ -48,11 +73,17 @@ function Home() {
       <section className={`${basePath && "hidden"}`}>
         <Outlet />
       </section>
-      <div className="lg:flex justify-center items-center flex-col gap-2 hidden">
+      <div
+        className={`justify-center items-center flex-col gap-2 hidden ${
+          !basePath ? "hidden" : "lg:flex"
+        }`}
+      >
         <div>
           <img src={logo} alt="logo" width={200} />
         </div>
-        <p className="text-lg mt-2 text-slate-500">Select user to send message</p>
+        <p className="text-lg mt-2 text-slate-500">
+          Select user to send message
+        </p>
       </div>
     </div>
   );

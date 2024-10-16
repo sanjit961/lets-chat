@@ -45,6 +45,7 @@ function Sidebar() {
             onClick={() => setEditUserOpen(true)}
           >
             <Avatar
+            userId={user?._id}
               name={user?.name}
               imageUrl={user?.profile_pic}
               width={38}
