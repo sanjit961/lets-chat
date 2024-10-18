@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoChatbubbleEllipses } from "react-icons/io5";
 import { FaUserPlus } from "react-icons/fa";
 import { BiLogOut } from "react-icons/bi";
@@ -10,10 +10,59 @@ import { FiArrowUpLeft } from "react-icons/fi";
 import SearchUser from "./SearchUser";
 
 function Sidebar() {
+  const socketConnection = useSelector(
+    (state) => state?.user?.socketConnection
+  );
   const user = useSelector((state) => state?.user);
   const [editUserOpen, setEditUserOpen] = useState(false);
   const [allUser, setAllUser] = useState([]);
   const [openSearchUser, setOpenSearchUser] = useState(true);
+
+  useEffect(() => {
+    if (socketConnection && user?._id) {
+      // Emit sidebar event with user ID
+      socketConnection.emit("sidebar", user._id);
+
+      // Listen for conversation data from the server
+      socketConnection.on("conversation", (data) => {
+        console.log("conversation", data);
+
+        const conversationData = data?.map((conversationUser) => {
+          // Check if the sender and receiver are the same user
+          if (
+            conversationUser?.sender?._id === conversationUser?.reciever?._id
+          ) {
+            return {
+              ...conversationUser,
+              userDetails: conversationUser?.sender,
+            };
+          }
+          // Check if the receiver is not the current user
+          else if (conversationUser?.reciever?._id !== user._id) {
+            return {
+              ...conversationUser,
+              userDetails: conversationUser?.reciever,
+            };
+          }
+          // Otherwise, assign sender as the userDetails
+          else {
+            return {
+              ...conversationUser,
+              userDetails: conversationUser?.sender,
+            };
+          }
+        });
+
+        // Update state with processed conversation data
+        setAllUser(conversationData);
+      });
+
+      // Cleanup to remove event listeners when component unmounts or socketConnection changes
+      return () => {
+        socketConnection.off("conversation");
+      };
+    }
+  }, [socketConnection, user]);
 
   return (
     <div className="w-full h-full grid grid-cols-[48px,1fr] bg-white">
@@ -45,7 +94,7 @@ function Sidebar() {
             onClick={() => setEditUserOpen(true)}
           >
             <Avatar
-            userId={user?._id}
+              userId={user?._id}
               name={user?.name}
               imageUrl={user?.profile_pic}
               width={38}
@@ -78,6 +127,27 @@ function Sidebar() {
               </p>
             </div>
           )}
+
+          {allUser?.map((conv, index) => {
+            return (
+              <div
+                key={conv?.id}
+                className="relative flex items-center space-x-4"
+              >
+                <Avatar
+                  imageUrl={conv?.userDetails?.profile_pic}
+                  name={conv?.userDetails?.name}
+                  width={40}
+                  height={40}
+                />
+                {/* You can add other details like name, status, etc., here */}
+                <div>
+                  <p>{conv?.userDetails?.name}</p>
+                  {/* Additional info like status or message */}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
